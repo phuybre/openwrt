@@ -1,0 +1,20 @@
+--- a/src/ap/vlan_init.c	2012-10-14 22:30:08.000000000 +0300
++++ b/src/ap/vlan_init.c	2012-10-14 23:51:12.000000000 +0300
+@@ -493,7 +493,7 @@
+ 	while (vlan) {
+ 		if (os_strcmp(ifname, vlan->ifname) == 0) {
+ 
+-			os_snprintf(br_name, sizeof(br_name), "brvlan%d",
++			os_snprintf(br_name, sizeof(br_name), "br-vlan%d",
+ 				    vlan->vlan_id);
+ 
+ 			if (!br_addbr(br_name))
+@@ -550,7 +550,7 @@
+ 
+ 	while (vlan) {
+ 		if (os_strcmp(ifname, vlan->ifname) == 0) {
+-			os_snprintf(br_name, sizeof(br_name), "brvlan%d",
++			os_snprintf(br_name, sizeof(br_name), "br-vlan%d",
+ 				    vlan->vlan_id);
+ 
+ 			if (vlan->clean & DVLAN_CLEAN_WLAN_PORT)

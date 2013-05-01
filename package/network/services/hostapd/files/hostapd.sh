@@ -2,6 +2,7 @@ hostapd_set_bss_options() {
 	local var="$1"
 	local vif="$2"
 	local enc wep_rekey wpa_group_rekey wpa_pair_rekey wpa_master_rekey wps_possible
+	local vlan_enable ifname vlan_file vlan_interface vlan_naming
 
 	config_get enc "$vif" encryption
 	config_get wep_rekey        "$vif" wep_rekey        # 300
@@ -116,6 +117,22 @@ hostapd_set_bss_options() {
 			[ -n "$wpa_group_rekey"  ] && append "$var" "wpa_group_rekey=$wpa_group_rekey" "$N"
 			[ -n "$wpa_pair_rekey"   ] && append "$var" "wpa_ptk_rekey=$wpa_pair_rekey"    "$N"
 			[ -n "$wpa_master_rekey" ] && append "$var" "wpa_gmk_rekey=$wpa_master_rekey"  "$N"
+			config_get vlan_enable "$vif" vlan_enable 0
+			case "$vlan_enable" in
+				1|2)
+					append "$var" "dynamic_vlan=$vlan_enable" "$N"
+					config_get ifname "$vif" ifname
+					config_get vlan_file "$vif" vlan_file "/var/run/hostapd.${ifname}.vlan"
+					[ "$vlan_file" = "/var/run/hostapd.${ifname}.vlan" ] && cat > "$vlan_file" <<-EOF
+					* ${ifname}.#
+					EOF
+					append "$var" "vlan_file=$vlan_file" "$N"
+					config_get vlan_interface "$vif" vlan_interface eth0
+					append "$var" "vlan_tagged_interface=$vlan_interface" "$N"
+					config_get vlan_naming "$vif" vlan_naming 1
+					append "$var" "vlan_naming=$vlan_naming" "$N"
+				;;
+			esac
 		;;
 		*wep*)
 			config_get key "$vif" key
