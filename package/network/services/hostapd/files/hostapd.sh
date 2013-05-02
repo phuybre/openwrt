@@ -3,7 +3,8 @@ hostapd_set_bss_options() {
 	local vif="$2"
 	local enc wep_rekey wpa_group_rekey wpa_pair_rekey wpa_master_rekey wps_possible
 	local vlan_enable ifname vlan_file vlan_interface vlan_naming
-
+        local wpa_psk_radius
+        
 	config_get enc "$vif" encryption
 	config_get wep_rekey        "$vif" wep_rekey        # 300
 	config_get wpa_group_rekey  "$vif" wpa_group_rekey  # 300
@@ -85,6 +86,26 @@ hostapd_set_bss_options() {
 			[ -n "$wpa_group_rekey"  ] && append "$var" "wpa_group_rekey=$wpa_group_rekey" "$N"
 			[ -n "$wpa_pair_rekey"   ] && append "$var" "wpa_ptk_rekey=$wpa_pair_rekey"    "$N"
 			[ -n "$wpa_master_rekey" ] && append "$var" "wpa_gmk_rekey=$wpa_master_rekey"  "$N"
+                        # if wpa_psk_radius is set, we should pull in all radius server settings
+			config_get wpa_psk_radius "$vif" wpa_psk_radius 0
+			case "$wpa_psk_radius" in
+				1|2)
+					append "$var" "wpa_psk_radius=$wpa_psk_radius" "$N"
+					append "$var" "macaddr_acl=2" "$N"
+					config_get auth_server "$vif" auth_server 127.0.0.1 
+                			append "$var" "auth_server_addr=$auth_server"  "$N"
+					config_get auth_port "$vif" auth_port  1812
+                			append "$var" "auth_server_port=$auth_port"  "$N"
+					config_get auth_secret "$vif" auth_secret  
+                			[ -n "$auth_secret" ] && append "$var" "auth_server_shared_secret=$auth_secret"  "$N"
+					config_get acct_server "$vif" acct_server 127.0.0.1
+                			append "$var" "acct_server_addr=$acct_server"  "$N"
+					config_get acct_port "$vif" acct_port 1813 
+                			append "$var" "acct_server_port=$acct_port"  "$N"
+					config_get acct_secret "$vif" acct_secret  
+                			[ -n "$acct_secret" ] && append "$var" "acct_server_shared_secret=$acct_secret"  "$N"
+				;;
+			esac
 		;;
 		*wpa*)
 			# required fields? formats?
