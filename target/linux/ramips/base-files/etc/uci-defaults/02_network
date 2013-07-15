@@ -13,7 +13,6 @@ ramips_setup_rt3x5x_vlans()
 	fi
 	local wanports=""
 	local lanports=""
-	swconfig dev rt305x set reset 1
 	for port in 5 4 3 2 1 0; do
 		if [ `swconfig dev rt305x port $port get disable` = "1" ]; then
 			continue
@@ -172,6 +171,7 @@ ramips_setup_macs()
 	broadway | \
 	dir-620-d1 | \
 	f5d8235-v1 | \
+	mpr-a2 | \
 	mzk-w300nh2 | \
 	nw718 | \
 	psr-680w | \
